@@ -3,12 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Accessibility">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Managed\Accessibility.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Boo.Lang">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Managed\Boo.Lang.dll</HintPath>
@@ -288,6 +291,93 @@
     </Reference>
     <Reference Include="Mono.WebBrowser">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Managed\Mono.WebBrowser.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Extensions.Addressables">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Extensions.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Extensions.DOTween">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Extensions.DOTween.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Extensions.Rewired">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Extensions.Rewired.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Runtime.Core.Gameplay">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Runtime.Core.Gameplay.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Runtime.Core.Initializers">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Runtime.Core.Initializers.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Runtime.Core.SceneManagement">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Runtime.Core.SceneManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Runtime.Core.Scriptable">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Runtime.Core.Scriptable.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Runtime.Extensions.Localization">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Runtime.Extensions.Localization.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Audio">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Audio.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Camera">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Camera.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Confirmation">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Confirmation.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Confirmation.Adult">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Confirmation.Adult.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Dialogue">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Dialogue.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Input">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Input.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Saving">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Saving.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Saving.Serialization">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Saving.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.SharpConfig">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.SharpConfig.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Steam">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Steam.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Subtitle">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Subtitle.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Tools">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Tools.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Tools.Miscellaneous.Adult">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Tools.Miscellaneous.Adult.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Tools.PubSub">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Tools.PubSub.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.UI">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.UI.ButtonHint">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.UI.ButtonHint.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.UI.Draggable">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.UI.Draggable.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.UI.Elements">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.UI.Elements.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.UI.Enums">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.UI.Enums.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.UI.Miscellaneous">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.UI.Miscellaneous.dll</HintPath>
+    </Reference>
+    <Reference Include="MonsterBox.Systems.Video">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\MonsterBox.Systems.Video.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Managed\Newtonsoft.Json.dll</HintPath>
@@ -677,7 +767,7 @@
   </ItemGroup>
 
   <ItemGroup>
-  <EmbeddedResource Include="funny.assetbundle"/>
+  <EmbeddedResource Include="funny.assetbundle" />
   </ItemGroup>
 
 </Project>
