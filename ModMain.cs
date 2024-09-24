@@ -6,12 +6,9 @@ using UnityEngine.Rendering.Universal;
 using Il2CppParadoxNotion;
 using Harmony;
 using HarmonyLib;
-using System.Reflection.Metadata;
-using System.Reflection;
 using System.Collections;
 using Il2CppMono.Unity;
 using Il2CppNodeCanvas.Tasks.Actions;
-using Il2CppSystem;
 using UnityEngine.UI;
 using Il2CppInterop.Runtime;
 using Il2CppTMPro;
@@ -52,6 +49,15 @@ using Il2CppMonsterBox.Runtime.Gameplay.Enums;
 using Il2CppMonsterBox.Runtime.Gameplay.SecurityOffice;
 using Il2CppMonsterBox.Runtime.Gameplay.Character;
 using Il2CppRewired.Platforms;
+using UnityEngine.Events;
+using Il2CppSystem.Runtime.InteropServices;
+using Il2CppMonsterBox.Runtime.Gameplay.Interactables;
+using Il2CppSystem.ComponentModel;
+using Il2CppMonsterBox.Systems.UI.Elements;
+using UnityEngine.Localization.Components;
+using MonsterBox.Runtime.Extensions._Localization;
+using MonsterBox.Systems.UI.Elements;
+using Il2CppMonsterBox.Runtime.Extensions._NodeCanvas.Tasks.Game.Customer;
 [assembly: MelonInfo(typeof(ModMain), "FutanariMod", "10.10.2024", "FoxComment", "https://github.com/foxcomment/inheat_futamod")]
 [assembly: MelonGame("MonsterBox", "IN HEAT")]
 namespace FutaMod
@@ -59,11 +65,10 @@ namespace FutaMod
 
     public class ModMain : MelonMod
     {
-        Transform cameraTRA = null;
         GameObject[] goNames = new GameObject[0];
-        string objectList = " asdvdfvbsed df s d sdfg sedfdfgedfsdffvgds vbdf ";
         GameObject[] listObjectDirectoryActive = new GameObject[0];
 
+        string objectList = " asdvdfvbsed df s d sdfg sedfdfgedfsdffvgds vbdf ";
         public string addressField = "InHeatFutaMod.funny.assetbundle";
 
         private const string textureAppendageSammyFile = "Assets/Futa/Textures/SammyV1.png";
@@ -90,7 +95,7 @@ namespace FutaMod
 
         GameObject prefabAppendageOne;
 
-        Toggle intersexSettingsToggle;
+
         RectTransform prefabIntersexSettingsItem;
 
         Material defaultMaterial;
@@ -98,10 +103,18 @@ namespace FutaMod
 
         List<GameObject> activeAppendages = new List<GameObject>(0);
 
+        RectTransform adultSection;
+
+        Button optionsButton;
+
+
+
+
         bool DEBUG = true;
         public override void OnInitializeMelon()
         {
             LoadAssetBundle();            
+            
         }
 
 
@@ -136,10 +149,12 @@ namespace FutaMod
 
         IEnumerator AppendageAlive(SkinnedMeshRenderer _mesh, CharacterControllerBase _controller)
         {
+            if (PlayerPrefs.GetString("Topless") == "True")
+            {
+                _controller.CostumeSwitcher.defaultVariant = "Nude";
 
-            _controller.CostumeSwitcher.defaultVariant = "Nude";
-
-            _controller.CostumeSwitcher.SwitchVariant("Nude");
+                _controller.CostumeSwitcher.SwitchVariant("Nude");
+            }
 
             Animator _anim = _mesh.transform.parent.GetComponent<Animator>();
             MelonLogger.Msg("Cuck Created for " + _controller.character + " Deciding Stuff");
@@ -170,6 +185,7 @@ namespace FutaMod
                     break;
             }
 
+            _mesh.enabled = (PlayerPrefs.GetString("Intersex") == "True");
         }
 
         private void SpawnAppendage(CharacterControllerBase _character, Transform _hipBone)
@@ -276,19 +292,6 @@ namespace FutaMod
             }
         }
         
-        void AddIntersexToggleToSettings()
-        {
-           // GameObject _adultSectionTRA = GameObject.FindObjectOfType<SettingsUIManager>().gameObject;
-            //MelonLogger.Msg(_adultSectionTRA.gameObject.name);
-            //MelonLogger.Msg(_adultSectionTRA.transform.GetChildCount());
-            
-       //     for (int i = 0; i < _adultSectionTRA.transform.childCount-1; i++)
-         //   {
-           //     MelonLogger.Msg(_adultSectionTRA.transform.GetChild(i).gameObject.name);
-            //}
-            //toggle
-        }
-
 
         void FetchDefaultAssets()
         {
@@ -362,22 +365,136 @@ namespace FutaMod
         //{ 
         //}
 
+        void SpawnItemInSettings(string _title, Action<bool> _void)
+        {
+            GameObject _toggle = UnityEngine.Object.Instantiate(GameObject.Find("Radio - H Content"), adultSection);
+
+            UnityEngine.Object.Destroy(_toggle.GetComponentInChildren<Il2CppMonsterBox.Runtime.Extensions._Localization.LocalizeTMPFontEvent>());
+            UnityEngine.Object.Destroy(_toggle.GetComponentInChildren<Il2CppMonsterBox.Runtime.Extensions._Localization.LocalizeTMPFontMaterialEvent>());
+            UnityEngine.Object.Destroy(_toggle.GetComponentInChildren<LocalizeStringEvent>());
+
+            _toggle.GetComponentInChildren<Il2CppTMPro.TextMeshProUGUI>().text = _title;
+
+            _toggle.GetComponent<Il2CppMonsterBox.Systems.UI.Elements.UIRadio>().onRadioChanged.AddListener(DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<bool>>(_void));
+
+
+
+            //_radio.GetComponent<Il2CppMonsterBox.Systems.UI.Elements.UIScrollElement>().;
+            //_radio.GetComponent<Il2CppMonsterBox.Runtime.UI.Settings.TooltipElement>().;
+            //UnityEngine.Component[] _comps = _radio.transform.GetComponents(Il2CppType.Of<UnityEngine.Component>());
+            //foreach (UnityEngine.Component item in _comps)
+            //{
+            //    MelonLogger.Msg("Comps1: " + item.ToString());
+            //    MelonLogger.Msg("Comps2: " + item.ObjectClass);
+            //    MelonLogger.Msg("Comps3: " + item.name);
+            //    MelonLogger.Msg("Comps4: " + item + "\n");
+            //}
+        }
+
+
+        void SpawnCustomSettingItems()
+        {
+            if (adultSection)
+                return;
+
+            GameObject _radio = GameObject.Find("Radio - H Content");
+            adultSection = _radio.transform.parent.GetComponent<RectTransform>();
+            SpawnItemInSettings("Intersex Mode", FutaButtonListener);
+            SpawnItemInSettings("Topless Mode", ToplessButtonListener);
+            MelonLogger.Msg(_radio.transform.parent.name);;
+        }
+        void FutaButtonListener(bool _isOn)
+        {
+            PlayerPrefs.SetString("Intersex", _isOn.ToString());
+
+            foreach (GameObject _appendage in activeAppendages)
+                _appendage.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().enabled = (PlayerPrefs.GetString("Intersex") == "True");
+        }
+
+
+        void ToplessButtonListener(bool _isOn)
+        {
+            PlayerPrefs.SetString("Topless", _isOn.ToString());
+
+            foreach (GameObject _appendage in activeAppendages)
+                _appendage.GetComponent<Animator>().SetBool("Topless", (PlayerPrefs.GetString("Topless") == "True"));
+
+            if (PlayerPrefs.GetString("Topless") == "True")
+                foreach (CharacterControllerBase item in activeCharacters)
+                {
+                    item.CostumeSwitcher.SwitchVariant("Nude");
+                    item.CostumeSwitcher.defaultVariant = "Nude";
+                }
+
+            else
+                foreach (CharacterControllerBase item in activeCharacters)
+                {
+                    item.CostumeSwitcher.SwitchVariant("Clothed");
+                    item.CostumeSwitcher.defaultVariant = "Clothed";
+                }
+        }
 
 
 
 
+        void SettingsButtonListener()
+        {
+            if (!optionsButton)
+            {
+                optionsButton = GameObject.Find("Button - Settings").GetComponent<Button>();
+                optionsButton.onClick.AddListener(new Action(() => { SpawnCustomSettingItems(); }));
+            }
+        }
         public override void OnLateUpdate()
         {
-
-
-            if (Input.GetKeyUp(KeyCode.Escape))
+            
+            if (Input.GetKeyUp(KeyCode.Escape) || Input.GetKeyUp(KeyCode.LeftAlt))
             {
+                
                 MelonLogger.Msg("Paused: " + (Time.timeScale == 0));
+
+
+                if (Time.timeScale != 0)
+                    return;
+                SettingsButtonListener();
+
+              //  MelonLogger.Msg("Active Menu Man: " + (GameObject.FindObjectOfType<Il2CppMonsterBox.Systems.UI.UIManagerBase>()) != null);
+
+               // MelonLogger.Msg("Focused UI: "+GameObject.FindObjectOfType<Il2CppMonsterBox.Systems.UI.UIManagerBase>().ActivePanel.name);
+                //MelonLogger.Msg("Kids amt: "+GameObject.FindObjectOfType<Il2CppMonsterBox.Systems.UI.UIManagerBase>().ActivePanel.transform.childCount);
+                //GameObject _adultSectionTRA = GameObject.FindObjectOfType<SettingsUIManager>().gameObject;
+                //MelonLogger.Msg(_adultSectionTRA.gameObject.name);
+                //MelonLogger.Msg(_adultSectionTRA.transform.GetChildCount());
+                //
+      //          Il2CppMonsterBox.Systems.UI.UIManagerBase _TMP2 = GameObject.FindObjectOfType<Il2CppMonsterBox.Systems.UI.UIManagerBase>();
+      //           for (int i = 0; i < _TMP2.ActivePanel.transform.childCount-1; i++)
+      //              MelonLogger.Msg(_TMP2.ActivePanel.transform.GetChild(i).gameObject.name);
+
+                //MelonLogger.Msg("AD Section prent: " + GameObject.Find("Button - Settings"));
+
+                //MelonLogger.Msg("\n\n");
+                /*
+                Transform _TMP3 = GameObject.FindObjectOfType<Il2CppMonsterBox.Systems.UI.UIManagerBase>().transform.GetChild(0);
+                for (int i = 0; i < _TMP3.childCount - 1; i++)
+                    MelonLogger.Msg(_TMP3.GetChild(i).gameObject.name);
+
+                Transform _TMP4 = GameObject.FindObjectOfType<Il2CppMonsterBox.Runtime.UI.Settings.SettingsAdultSection>().transform.GetChild(0);
+                for (int i = 0; i < _TMP4.childCount - 1; i++)
+                    MelonLogger.Msg(_TMP4.GetChild(i).gameObject.name);
+            */}
+
+
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                RectTransform[] _itm = GameObject.FindObjectsOfType<RectTransform>();
+                foreach (RectTransform _itmNam in _itm)
+                    MelonLogger.Msg(_itmNam.gameObject.name);
             }
+            //Radio - H Content
+            //Button - Settings
 
 
-
-                if (Input.GetKeyDown(KeyCode.Alpha0))
+            if (Input.GetKeyDown(KeyCode.Alpha0))
             {
                 MelonLogger.Msg("TP " + activeCharacters.Length + " characters");
                 byte id = 0;

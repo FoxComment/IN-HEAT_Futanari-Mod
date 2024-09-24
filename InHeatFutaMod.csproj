@@ -535,6 +535,9 @@
     <Reference Include="SystemWebTestShim">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Managed\SystemWebTestShim.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Localization">
+      <HintPath>..\..\..\..\OneDrive\Документы\Il2cpp-dumper\cpp2il_out\Unity.Localization.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipeline.Universal.ShaderLibrary">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\IN HEAT\MelonLoader\Il2CppAssemblies\Unity.RenderPipeline.Universal.ShaderLibrary.dll</HintPath>
     </Reference>
