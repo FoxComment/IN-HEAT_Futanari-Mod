@@ -1,6 +1,6 @@
 ﻿using MelonLoader;
 using UnityEngine;
-using FutaMod;
+using FutanariMod;
 using Il2CppMonsterBox;
 using System.Collections;
 using UnityEngine.UI;
@@ -52,17 +52,17 @@ using Il2CppInterop.Runtime.Runtime;
 using Il2CppInterop.Common.Attributes;
 using HarmonyLib;
 using Il2CppMonsterBox.Runtime.Gameplay.Level;
-using Il2CppNodeCanvas.Tasks.Actions;
-using Mono.CSharp;
+using Il2CppMonsterBox.Runtime.Gameplay.SecurityOffice.Enums;
+using Il2CppTMPro;
+using static FutanariMod.ModMain;
 using UnityEngine.TextCore.Text;
-using UnityEngine.Rendering.Universal;
-using Il2CppSteamworks;
-using static FutaMod.ModMain;
-[assembly: MelonInfo(typeof(ModMain), "FutanariMod", "10.10.2024", "FoxComment", "https://github.com/foxcomment/inheat_futamod")]
-[assembly: MelonGame("MonsterBox", "IN HEAT")]
-namespace FutaMod
-{
 
+[assembly: MelonInfo(typeof(ModMain), "Futanari Mod", "2024.9.30", "FoxComment", "https://github.com/foxcomment/IN-HEAT_Futanari-Mod")]
+[assembly: MelonGame("MonsterBox", "IN HEAT")]
+namespace FutanariMod
+{
+    //ADD SITUATION HANDLING IN CASE ARI WERE SENT INTO DARK ROOM
+    //
     public class ModMain : MelonMod
     {
         public static List<Appendage> activeAppendages = new List<Appendage>(0);
@@ -83,27 +83,34 @@ namespace FutaMod
         private const string addressField = "InHeatFutaMod.funny";
 
         private const string textureSammyFile = "Assets/Futa/Textures/SammyV1.png";
-        private const string textureMaddyFile = "Assets/Futa/Textures/MaddyV1.png";
+        private const string textureMaddieFile = "Assets/Futa/Textures/MaddyV1.png";
         private const string texturePoppiFile = "Assets/Futa/Textures/PoppiV1.png";
-        private const string textureAriFile = "Assets/Futa/Textures/AriV1.png";
+        private const string textureAriFile = "Assets/Futa/Textures/AriV2.png";
         private const string textureNileFile = "Assets/Futa/Textures/NileV1.png";
 
         private const string spriteHContentFile = "Assets/Futa/Textures/IntersexButtonBG.png";
 
-        private const string appendageOnePrefabFile = "Assets/Futa/Prefs/AppengadeOne.prefab";
+        private const string appendageGenericPrefabFile = "Assets/Futa/Prefs/AppendageGeneric.prefab";
+        private const string appendageAriPrefabFile = "Assets/Futa/Prefs/AppendageAri.prefab";
+
+        private const string creamScreenPrefabFile = "Assets/Futa/Prefs/CreamScreen.prefab";
 
         private Texture2D textureSammy;
-        private Texture2D textureMaddy;
+        private Texture2D textureMaddie;
         private Texture2D texturePoppi;
         private Texture2D textureAri;
         private Texture2D textureNile;
 
         private Sprite spriteHContent;
 
-        private CharacterControllerBase[] activeCharacters;
+        private static List<CharacterControllerBase> activeCharacters;
 
-        private GameObject prefabAppendageOne;
-        //GameObject prefabAppendageTwo;        //ADD MORE MODELS
+        private GameObject prefabCreamScreen;
+
+        private GameObject activeCreamScreen;
+
+        private GameObject prefabAppendageGeneric;
+        private GameObject prefabAppendageAri;
         //GameObject prefabAppendageThree;      //ADD MORE MODELS
 
         Material defaultMaterial;
@@ -111,13 +118,19 @@ namespace FutaMod
 
         private RectTransform adultSection;
 
+        private static ModMain instance;
+
         private Button optionsButton;
 
-        bool DEBUG = true;
+        int currentNight;
 
-        public static bool topless { get; private set; } = false;   //Turn into an event
+        Level currentLevelType;
 
-        public static bool intersex { get; private set; } = false;   //Turn into an event
+        public static bool topless { get; private set; } = false;
+        public static event Action<bool> OnToplessChange;
+        public static bool intersex { get; private set; } = false;
+        public static event Action<bool> OnIntersexChange;
+
 
 
 
@@ -129,7 +142,6 @@ namespace FutaMod
 
 
         public override void OnInitializeMelon() => LoadAssetBundle();
-        void FetchCharacters() => MelonCoroutines.Start(fetchCharacters());
 
 
 
@@ -146,38 +158,35 @@ namespace FutaMod
             }
 
             AssetBundle _bundle = AssetBundle.LoadFromMemory(memoryStream.ToArray());
+             
+            //Assign assets to variable
 
-            if (DEBUG)
-            {
-                MelonLogger.Msg("*=-  " + _bundle.name + "   \n\n Listing:");
+            prefabCreamScreen = _bundle.LoadAsset_Internal(creamScreenPrefabFile, Il2CppType.Of<GameObject>()).Cast<GameObject>();
 
-                string[] objNames = _bundle.GetAllAssetNames();
-                foreach (string objName in objNames)
-                    MelonLogger.Msg("   * " + objName);
-            }
-
-            //Assign assets to variables
-
-            prefabAppendageOne = _bundle.LoadAsset_Internal(appendageOnePrefabFile, Il2CppType.Of<GameObject>()).Cast<GameObject>();
+            prefabAppendageGeneric = _bundle.LoadAsset_Internal(appendageGenericPrefabFile, Il2CppType.Of<GameObject>()).Cast<GameObject>();
+            prefabAppendageAri = _bundle.LoadAsset_Internal(appendageAriPrefabFile, Il2CppType.Of<GameObject>()).Cast<GameObject>();
 
             texturePoppi = _bundle.LoadAsset_Internal(texturePoppiFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
             textureNile = _bundle.LoadAsset_Internal(textureNileFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
             textureSammy = _bundle.LoadAsset_Internal(textureSammyFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
             textureAri = _bundle.LoadAsset_Internal(textureAriFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
-            textureMaddy = _bundle.LoadAsset_Internal(textureMaddyFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
+            textureMaddie = _bundle.LoadAsset_Internal(textureMaddieFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
 
             Texture2D _spriteTemp = _bundle.LoadAsset_Internal(spriteHContentFile, Il2CppType.Of<Texture2D>()).Cast<Texture2D>();
             spriteHContent = Sprite.Create(_spriteTemp, new Rect(0, 0, _spriteTemp.width, _spriteTemp.height), Vector2.one * .5f, 100);
 
             //Add flags, so the variables won't be cleared on scene change
 
-            prefabAppendageOne.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            prefabCreamScreen.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            prefabAppendageGeneric.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            prefabAppendageAri.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             texturePoppi.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             textureNile.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             textureSammy.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             textureAri.hideFlags |= HideFlags.DontUnloadUnusedAsset;
-            textureMaddy.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            textureMaddie.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             spriteHContent.hideFlags |= HideFlags.DontUnloadUnusedAsset;
         }
@@ -192,7 +201,7 @@ namespace FutaMod
             if (defaultShader)
                 return;
 
-            if (GameObject.FindObjectOfType<SkinnedMeshRenderer>() == null)
+            if (!GameObject.FindObjectOfType<SkinnedMeshRenderer>())
                 return;
 
             defaultShader = GameObject.FindObjectOfType<SkinnedMeshRenderer>().material.shader;
@@ -203,21 +212,17 @@ namespace FutaMod
 
         public override void OnSceneWasInitialized(int buildindex, string sceneName)
         {
+            instance = this;
             FetchDefaultAssets();
 
-            activeCharacters = new CharacterControllerBase[0];
+            activeCharacters = new List<CharacterControllerBase>(0) { };
             activeAppendages = new List<Appendage>(0) { };
 
             if (LevelManagerBase.Exists)
-                switch (LevelManagerBase.Level)
-                {
-                    case Level.SecurityOffice:
-                        FetchCharacters();
-                        break;
-                    case Level.Nightclub:
-                        FetchCharacters();
-                        break;
-                }
+            {
+                currentNight = LevelManagerBase._levelConfig.levelNumber;
+                currentLevelType = LevelManagerBase.Level;
+            }
             else                                                                                    //If main menu
             if (GameObject.FindObjectOfType<AdultSpriteSwitcher>())                     //If Gallery button found
             {
@@ -227,19 +232,6 @@ namespace FutaMod
 
                 AddSettingsButtonListener();
             }
-        }
-
-
-
-        IEnumerator fetchCharacters()
-        {
-            //Give this thing a moment, because characters are not being spaned on a first frame for whatever reason
-            yield return new WaitForSeconds(.1f);
-
-            activeCharacters = GameObject.FindObjectsOfType<CharacterControllerBase>(); //Get all the Characters on the level
-
-            yield return new WaitForSeconds(.1f);
-            SpawnAppendagesForActiveChatacters();
         }
 
 
@@ -255,25 +247,21 @@ namespace FutaMod
 
 
 
-        void SpawnAppendagesForActiveChatacters()
+        public void InstantiateAppendage(CharacterControllerBase _character, Transform _hipBone)
         {
-            foreach (CharacterControllerBase _character in activeCharacters)
+            GameObject _appendage;
+
+            switch (_character.character)
             {
-                var children = _character.Animator.transform.GetChild(0).GetComponentsInChildren<Transform>();
-                foreach (var child in children)
-                    if (child.name == "DEF-spine")
-                    {
-                        InstantiateAppendage(_character, child.transform);
-                        break;
-                    }
+                case Characters.Ari:
+                _appendage = UnityEngine.Object.Instantiate(prefabAppendageAri, _hipBone);
+                    break;
+
+                default:
+                _appendage = UnityEngine.Object.Instantiate(prefabAppendageGeneric, _hipBone);
+                    break;
             }
-        }
 
-
-
-        private void InstantiateAppendage(CharacterControllerBase _character, Transform _hipBone)
-        {
-            GameObject _appendage = UnityEngine.Object.Instantiate(prefabAppendageOne, _hipBone);
             SkinnedMeshRenderer _mesh = _appendage.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
             Animator _anim = _appendage.GetComponent<Animator>();
 
@@ -282,16 +270,16 @@ namespace FutaMod
             _mesh.material.SetFloat("_Smoothness", 0);              //Remove shine
             _mesh.material.SetFloat("_EnvironmentReflections", 0);  //Remove shine
 
-            switch (_character.character) 
+            switch (_character.character)
             {
                 case Characters.Ari:
                     _mesh.material.mainTexture = textureAri;
-                    SetAppendageParameters(_anim, .103f, .49f, 0, .02f);
+                    SetAppendageParameters(_anim, .103f, .49f, 1, 1);
                     break;  //Green
 
                 case Characters.Sammy:
                     _mesh.material.mainTexture = textureSammy;
-                    SetAppendageParameters(_anim, .065f, .68f,.3f,.16f);
+                    SetAppendageParameters(_anim, .065f, .68f, .3f, .16f);
                     break;  //Tiger
 
                 case Characters.Poppi:
@@ -305,27 +293,31 @@ namespace FutaMod
                     break;  //Black cat
 
                 case Characters.Maddie:
-                    _mesh.material.mainTexture = textureMaddy;
-                    SetAppendageParameters(_anim, .13f, .7f, .7f, .35f);
+                    _mesh.material.mainTexture = textureMaddie;
+                    SetAppendageParameters(_anim, .13f, .7f, .7f);
                     break;  //Microvawe thing
-                
+
                 case Characters.Misty:
-                    _mesh.material.mainTexture = textureMaddy;
+                    _mesh.material.mainTexture = textureMaddie;
                     SetAppendageParameters(_anim, .02f, .4f, 1);
                     break;  //Shark
 
                 case Characters.Kass:
                     UnityEngine.Object.Destroy(_appendage);
                     return; //Kass is not an actual enemy character (racoon dumpster thing)
+
+                case Characters.AriBM:
+                    UnityEngine.Object.Destroy(_appendage);
+                    return;
             }
 
             MelonCoroutines.Start(AppendageStart(_mesh, _character));   //Start appendage routine for a fresh new appendage
         }
 
 
-        
+
         /// <summary>
-        /// Set Placement,  Scale  and overall look.
+        /// Set Placement, Scale and overall look.
         /// </summary>
         /// <param name="_anim">Animator</param>
         /// <param name="_offest">How much the appendage should be moved forward (locally)</param>
@@ -347,11 +339,12 @@ namespace FutaMod
         /// Appendage routine
         /// </summary>
         /// <param name="_controller">Assigned character controller</param>
-        IEnumerator AppendageStart(SkinnedMeshRenderer _mesh, CharacterControllerBase _controller)
+        private IEnumerator AppendageStart(SkinnedMeshRenderer _mesh, CharacterControllerBase _controller)
         {
+
             Animator _anim = _mesh.transform.parent.GetComponent<Animator>();
 
-            _anim.SetFloat("Breathe", UnityEngine.Random.Range(.7f, 1.2f)); //Desync cletching speed
+            _anim.SetFloat("Breathe", UnityEngine.Random.Range(.7f, 2f)); //Desync cletching speed
 
             _anim.SetBool("Intersex", intersex);                            //Assign current settings
 
@@ -359,18 +352,20 @@ namespace FutaMod
 
             activeAppendages.Add(new Appendage(_mesh.transform.parent.gameObject, _controller.character, _anim));
 
-            if (topless)                                                    
+            if (topless)
                 _controller.CostumeSwitcher.SwitchVariant("Nude");      //Undress character
 
             switch (LevelManagerBase.Level)
             {
                 case Level.SecurityOffice:
+
                     SecurityOfficeCharacterController _officeController = _controller.GetComponent<SecurityOfficeCharacterController>();
+                    _anim.SetFloat("Enlarge", .5f);
                     while (_mesh)                                       //Cycle while appendage eхists
                     {
-                        _anim.SetFloat("Enlarge", .5f);
-                        MelonLogger.Msg(_controller.character + " @: " + _officeController.currentPosition);
+                        //MelonLogger.Msg(_controller.character + " @: " + _officeController.currentPosition);
                         yield return new WaitForSeconds(1);
+                        break;
                     }
                     break;
 
@@ -395,16 +390,41 @@ namespace FutaMod
         /// Put appendage into a Fun Time mode
         /// </summary>Character</param>
         /// <param name="_fun">Are we having a good time? Or we done?</param>
-        public static void FunTime(Characters _char, bool _fun)
+        public static void AdjustAppendageOnRuntime(Characters _char, bool _leak = false, bool _cream = false, float _enlarge = -1)
         {
+
             if (_char == Characters.Everyone)
                 foreach (Appendage _appendage in activeAppendages)
-                    _appendage._Animator.SetBool("FunTime", _fun);                  //Set _fun to every character on a level
+                {
+                    _appendage._Animator.SetBool("FunTime", _cream);                  //Set _fun to every character on a level
+                    _appendage._Animator.SetBool("Leak", _leak);
+                    if (_enlarge != -1)
+                        _appendage._Animator.SetFloat("Enlarge", _enlarge);
+                }
             else
             {
                 int index = activeAppendages.FindIndex(x => x._Character == _char);     //Honesstly, idk, just copy/pasted from SO, and it works :p
                 if (index >= 0)
-                    activeAppendages[index]._Animator.SetBool("FunTime", _fun);     //Set _fun to a speciffic character's appendage
+                {
+                    activeAppendages[index]._Animator.SetBool("FunTime", _cream);     //Set _fun to a speciffic character's appendage
+                    activeAppendages[index]._Animator.SetBool("Leak", _leak);
+                    if (_enlarge != -1)
+                        activeAppendages[index]._Animator.SetFloat("Enlarge", _enlarge);
+
+                    if (_cream)
+                    {
+                        if (instance.activeCreamScreen)      //Check if Splooge screen already exists (impossible, but just in case)
+                            return;             //Stop
+
+                        if (_char == Characters.Sammy || _char == Characters.Poppi || _char == Characters.Nile)                 //These ones facing a camera
+                            instance.activeCreamScreen = UnityEngine.Object.Instantiate(instance.prefabCreamScreen, Camera.main.transform);   //Spawm Splooge screen
+                    }
+                    else
+                    {
+                        if (instance.activeCreamScreen)      //Check if Splooge screen exists 
+                            UnityEngine.Object.Destroy(instance.activeCreamScreen);  //Delete it
+                    }
+                }
             }
         }
 
@@ -472,6 +492,8 @@ namespace FutaMod
 
             intersex = (PlayerPrefs.GetString("Intersex") == "True");       //Set Intersex global bool
 
+            //OnIntersexChange(intersex);
+
             foreach (Appendage _appendage in activeAppendages)
                 _appendage._Animator.SetBool("Intersex", _isOn);            //Apply it to appendages
         }
@@ -483,11 +505,13 @@ namespace FutaMod
 
             topless = (PlayerPrefs.GetString("Topless") == "True");         //Set Topless global bool
 
+            //OnToplessChange(topless);
+
             foreach (Appendage _appendage in activeAppendages)
                 _appendage._Animator.SetBool("Topless", _isOn);             //Apply it to appendages
 
-            if (topless)                                                    
-                foreach (CharacterControllerBase item in activeCharacters) 
+            if (topless)
+                foreach (CharacterControllerBase item in activeCharacters)
                     item.CostumeSwitcher.SwitchVariant("Nude");             //Undress everyone
             else
                 foreach (CharacterControllerBase item in activeCharacters)
@@ -515,9 +539,7 @@ namespace FutaMod
         private static class ActStart   //Function nickname for myself, so i won't forget what it's for
         {
             public static void Prefix(ref NightclubCharacterController __instance)  //Call stuff before original script's events accure
-            {
-                FunTime(__instance.character, true);                                //Start the Act
-            }
+            => AdjustAppendageOnRuntime(__instance.character, false, true);                                //Start the Act
         }
 
 
@@ -528,15 +550,44 @@ namespace FutaMod
         [HarmonyPatch(typeof(NightclubCharacterController), "BeforeTimeSkip")]
         private static class ActEnd   //Function nickname for myself, so i won't forget what it's for
         {
-            public static void Prefix(ref NightclubCharacterController __instance)  //Call stuff before original script's events accure
+            public static void Postfix(ref NightclubCharacterController __instance)  //Call stuff before original script's events accure
             {
-                if (FutaMod.ModMain.topless)                                        //Check if Topless toggle is on
+                if (topless)                                        //Check if Topless toggle is on
                     __instance.CostumeSwitcher.SwitchVariant("Nude");           //Undress the character
 
-                FunTime(__instance.character, false);                               //End the Act
+                AdjustAppendageOnRuntime(__instance.character, false, false);                               //End the Act
             }
         }
 
+
+
+        [HarmonyPatch(typeof(SecurityOfficeCharacterController), "AttackPlayer")]
+        private static class CharacterMovemed   //Function nickname for myself, so i won't forget what it's for
+        {
+            public static void Postfix(ref SecurityOfficeCharacterController __instance)    //Original script patch + character _instance that had called it
+            => AdjustAppendageOnRuntime(__instance.character, true, false, 1);
+
+        }
+
+
+
+
+        [HarmonyPatch(typeof(CharacterControllerBase), "Initialize")]
+        private static class CharacterInit   //Function nickname for myself, so i won't forget what it's for
+        {
+            public static void Postfix(ref CharacterControllerBase __instance)  //Call stuff before original script's events accure
+            {
+                activeCharacters.Add(__instance);                               //Add this character to active characters
+
+                Transform[] _armatureBones = __instance.Animator.transform.GetChild(0).GetComponentsInChildren<Transform>();    //Get all the bones in the armature
+                foreach (Transform _bone in _armatureBones)
+                    if (_bone.name == "DEF-spine")  //Not effective, but just in case if character's hierarchy gets messed up. Animator.Avatar / .GetBoneTra returns null 
+                    {
+                        FutanariMod.ModMain.instance.InstantiateAppendage(__instance, _bone.transform);  //Instantiate appendage in Hip bone
+                        break;
+                    }
+            }
+        }
 
 
 
@@ -559,7 +610,7 @@ namespace FutaMod
             //DBG
             if (Input.GetKeyDown(KeyCode.Alpha0))
             {
-                MelonLogger.Msg("TP " + activeCharacters.Length + " characters");
+                MelonLogger.Msg("TP " + activeCharacters.Count + " characters");
                 byte id = 0;
                 foreach (CharacterControllerBase _obj in activeCharacters)
                 {
@@ -567,17 +618,9 @@ namespace FutaMod
                     _obj.transform.position = Camera.main.transform.position + Camera.main.transform.right * (id - 2) + Camera.main.transform.forward * 3 + Camera.main.transform.up * -.6f;
                     id++;
                 }
+                
             }
+        }
 
-            //DBG
-            if (Input.GetKeyDown(KeyCode.Alpha8))
-            {
-                foreach (CharacterControllerBase item in activeCharacters)
-                    item.Animator.SetBool("SexCA", true);
-            }
-
-
-        } 
     }
-
 }
