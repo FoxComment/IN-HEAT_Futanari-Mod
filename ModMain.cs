@@ -492,15 +492,16 @@ namespace FutanariMod
 
             GameObject genericButton = _instance.intensityButton.gameObject;
             creamButton = GameObject.Instantiate(genericButton.GetComponent<Button>(), genericButton.transform.parent);        //Get and assign a Settings button from the menu
-            creamButton.transform.GetChild(1).GetComponentInChildren<Il2CppTMPro.TextMeshProUGUI>().text ="Cream";
             creamButton.GetComponent<RectTransform>().localPosition += new Vector3(-600, 0, 0);                 //Set toggle title teхt
             creamButton.transform.GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(600,75);                    //Set toggle title teхt
-            UnityEngine.Object.Destroy(creamButton.transform.GetChild(0).gameObject);             //Remove translation junk
+            //nityEngine.Object.Destroy(creamButton.transform.GetChild(0).gameObject);             //Remove translation junk
             UnityEngine.Object.Destroy(creamButton.GetComponentInChildren<LocalizeTMPFontEvent>());             //Remove translation junk
             UnityEngine.Object.Destroy(creamButton.GetComponentInChildren<LocalizeTMPFontMaterialEvent>());     //Remove translation junk
-            UnityEngine.Object.Destroy(creamButton.GetComponentInChildren<LocalizeStringEvent>());              //Remove translation junk
+			UnityEngine.Object.Destroy(creamButton.GetComponentInChildren<LocalizeStringEvent>());              //Remove translation junk
+			UnityEngine.Object.Destroy(creamButton.transform.GetChild(2).gameObject);              //Remove translation junk
+			creamButton.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = "Character\nCream";
 
-            creamButton.onClick.AddListener(new Action(() => { CreamButtonListener(); }));                              //Add listener to button pressed
+			creamButton.onClick.AddListener(new Action(() => { CreamButtonListener(); }));                              //Add listener to button pressed
 
         }
 
