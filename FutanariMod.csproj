@@ -6,8 +6,5 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-  <EmbeddedResource Include="funny" />
-  </ItemGroup>
 
 </Project>
