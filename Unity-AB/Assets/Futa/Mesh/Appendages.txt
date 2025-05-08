@@ -1,0 +1,17 @@
+Even tho all the assets used in mod are free and accessible to anyone,
+you should get them from various resources Yourself. And heavily modify them
+too, to make them work with mod out of the box.
+
+	Every Appendage Must have these blendshapes;
+Girth
+Ball Size
+Throb
+Throb 1
+Throb 2
+Throb 3
+Throb 4
+Throb 5
+Shape
+BallThrob
+
+	You can check any Appendage prefab for bone structure if you need to
