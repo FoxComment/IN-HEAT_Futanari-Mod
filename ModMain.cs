@@ -25,6 +25,7 @@ using Il2CppMonsterBox.Runtime.Gallery;
 using UnityEngine.Localization.Components;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Il2CppMonsterBox.Runtime.UI.Gallery.Character;
 
 //using UnityEngine.Animations;
 //using Il2CppMonsterBox.Systems.Tools.Miscellaneous.Gameplay;
@@ -318,13 +319,15 @@ namespace FutanariMod
 				excitementSliderGallery.onValueChanged.AddListener(new Action<float>((_s) => { CharacterGalleryApplyFutaSettings(_s); }));                  //Add listener to button presses
 
 				leakToggleGallery = activeFutanariGallerySettings.GetComponentInChildren<Toggle>();
-				leakToggleGallery.onValueChanged.AddListener(new Action<bool>((_t) => { CharacterGalleryApplyFutaSettings(_t); }));                  //Add listener to button presses
+				leakToggleGallery.onValueChanged.AddListener(new Action<bool>((_t) => { CharacterGalleryApplyFutaSettings(_t); }));
+
+				MelonLogger.Msg("GALLERY");//Add listener to button presses
 			}
 
 			CheckSettingsPresence();
 			FetchDefaultAssets();
 
-			if (GameObject.Find("Model_Title_TV") != null)
+			if (sceneName.Contains("Title"))
 				InstantiateModLogo();
 		}
 
@@ -376,6 +379,7 @@ namespace FutanariMod
 					return;
 			}
 
+			MelonLogger.Msg("bone: " + _hipBone);
 			SkinnedMeshRenderer _mesh = _appendage.transform.GetComponentInChildren<SkinnedMeshRenderer>();
 			Animator _a_anim = _appendage.GetComponent<Animator>();
 
@@ -392,7 +396,7 @@ namespace FutanariMod
 					break;  //Tiger
 
 				case Characters.Poppi:
-					SetupAppendage(_a_anim, .071f, .5f, 0, .1f);
+					SetupAppendage(_a_anim, .075f, .5f, 0, .1f);
 					break;  //Buni
 
 				case Characters.Nile:
@@ -850,6 +854,7 @@ namespace FutanariMod
 		{
 			public static void Postfix(ref CharacterControllerBase __instance)            //Original script patch + character _instance that had called it
 			{
+				MelonLogger.Msg(" CHASR INITEDDD GAMEPS");
 				if (Topless)
 					__instance.CostumeSwitcher.SwitchVariant("Nude");                     //Undress character
 
@@ -860,6 +865,8 @@ namespace FutanariMod
 				{
 					if (_bone.name == "DEF-spine")                                        //Not effective, but just in case if character's hierarchy gets messed up. Animator.Avatar / .GetBoneTra returns null 
 					{
+
+						MelonLogger.Msg("Appendage INIT:." + __instance.character);
 						Instance.InstantiateAppendage(__instance.character, __instance.Animator, _bone.transform);  //Instantiate appendage in Hip bone
 						break;
 					}
@@ -869,45 +876,51 @@ namespace FutanariMod
 
 
 
-		/// <summary>
-		/// Called when switched to a character in Gallery
+		/// <summary> 
+		/// ...i honestly no idea on how to do it properly, tried charactermanager, gallerycontroller, and many other things.
+		/// simply, can't get it work in any other way. It will stay like that for now, until i gt enough motivation to figure
+		/// things out.
 		/// </summary>
-		[HarmonyPatch(typeof(GalleryCharacter), "Activate")]
-		private static class CharacterGallerySwitch
+		/// 
+		[HarmonyPatch(typeof(GalleryCharacterButton), "Initialize", new Type[] { typeof(int), typeof(GalleryCharacter) })]
+		private static class GalleryManagerssss
 		{
-			public static void Postfix(ref GalleryCharacter __instance)
+			public static void Postfix(ref GalleryCharacterButton __instance, int buttonIndex, GalleryCharacter character)
 			{
-				if (!activeCharactersGallery.Contains(__instance))
-				{
-					activeCharactersGallery.Add(__instance);                               //Add this character to active characters
 
-					Transform[] _armatureBones = __instance.Animator.transform.GetComponentsInChildren<Transform>();    //Get all the bones in the armature
+				if (!activeCharactersGallery.Contains(character))
+				{
+					activeCharactersGallery.Add(character);                               //Add this character to active characters
+
+					Transform[] _armatureBones = character.Animator.transform.GetComponentsInChildren<Transform>();    //Get all the bones in the armature
 					foreach (Transform _bone in _armatureBones)
 					{
 						if (_bone.name == "DEF-spine")                                      //Not effective, but just in case if character's hierarchy gets messed up. Animator.Avatar / .GetBoneTra returns null 
 						{
-							Instance.InstantiateAppendage(__instance.character, __instance.Animator, _bone.transform);  //Instantiate appendage in Hip bone
+							Instance.InstantiateAppendage(character.character, character.Animator, _bone.transform);  //Instantiate appendage in Hip bone
 							break;
 						}
 					}
+
+					if (Topless)
+						character._outfitSwitcher.SwitchVariant("Nude");                     //Undress character
 				}
 
-				Characters _char = __instance.character;
+				Characters _char = character.character;
 
 				int _appendageID = 999;
 				_appendageID = ActiveAppendages.FindIndex(x => x._Character == _char);     //Honesstly, idk, just copy/pasted from SO, and it works
 
+				MelonLogger.Msg("Active: " + character.character + "  " + _appendageID);
 				if (_appendageID == -1)
 					return;
 
-				ActiveAppendages[_appendageID]._GameObject.SetActive(Intersex && __instance._outfitSwitcher.CurrentVariant == "Nude");
+				ActiveAppendages[_appendageID]._GameObject.SetActive(Intersex && character._outfitSwitcher.CurrentVariant == "Nude");
 				ActiveAppendages[_appendageID]._Animator.SetFloat("Enlarge", Instance.excitementSliderGallery.value);
 				ActiveAppendages[_appendageID]._Animator.SetBool("FunTime", Instance.leakToggleGallery.isOn);
+
 			}
 		}
-
-
-
 		/// <summary>
 		/// Called when character's outfit switched in Gallery
 		/// </summary>
@@ -941,6 +954,7 @@ namespace FutanariMod
 		{
 			public static void Postfix(ref GalleryCharacter __instance)
 			{
+				AppendageActionOnRuntime(__instance.Character, false, Instance.leakToggleGallery.isOn, Instance.excitementSliderGallery.value);
 				Instance.AppendagePositionUpdate(__instance.character);
 			}
 		}
@@ -1103,7 +1117,5 @@ namespace FutanariMod
 		#endregion
 
 
-
-	}
 
 }
